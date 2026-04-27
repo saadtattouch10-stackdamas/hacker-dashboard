@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -59,7 +59,7 @@
             overflow-y: auto;
             display: none;
         }
-     .cursor {
+    .cursor {
             display: inline-block;
             width: 8px;
             height: 16px;
@@ -70,17 +70,30 @@
             0%, 50% { opacity: 1; }
             51%, 100% { opacity: 0; }
         }
-     .green { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
-     .red { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
-     .yellow { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
-     .cyan { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
+    .green { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+    .red { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+    .yellow { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
+    .cyan { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
+
+        /* Glitch Effect الجديد */
+    .glitch {
+            animation: glitch 0.3s infinite;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); text-shadow: 0 0 5px #00ff00; }
+            20% { transform: translate(-2px, 2px); text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; }
+            40% { transform: translate(-2px, -2px); text-shadow: -2px 0 #ff0000, 2px 0 #00ffff; }
+            60% { transform: translate(2px, 2px); text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; }
+            80% { transform: translate(2px, -2px); text-shadow: -2px 0 #ff0000, 2px 0 #00ffff; }
+            100% { transform: translate(0); text-shadow: 0 0 5px #00ff00; }
+        }
     </style>
 </head>
 <body>
     <div id="startScreen">
         <div style="margin-bottom:30px; text-align:center;">
-            <div class="cyan">DAMAS OS v3.0 MATRIX EDITION</div>
-            <div class="green">SYSTEM LOCKED</div>
+            <div class="cyan">DAMAS OS v3.1 GLITCH EDITION</div>
+            <div class="green">SYSTEM UNSTABLE</div>
         </div>
         <button id="startBtn">[ CLICK TO DECRYPT ]</button>
     </div>
@@ -95,7 +108,7 @@
         const ctx = canvas.getContext('2d');
         const terminal = document.getElementById('terminal');
 
-        // صوت الكيبورد - نستعمل Web Audio API باش ما نحتاجوش ملف
+        // صوت الكيبورد
         let audioCtx;
         function playKeySound() {
             if (!audioCtx) return;
@@ -111,13 +124,13 @@
         }
 
         startBtn.onclick = () => {
-            // نفعل الصوت
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             startScreen.style.display = 'none';
             canvas.style.display = 'block';
             terminal.style.display = 'block';
             initMatrix();
             setTimeout(typeWriter, 1000);
+            startGlitchEffect(); // نبداو الـ Glitch
         };
 
         // Matrix Rain
@@ -148,23 +161,25 @@
 
         // Terminal
         const lines = [
-            '<span class="cyan">DAMAS OS v3.0</span> - Decryption successful...',
+            '<span class="cyan">DAMAS OS v3.1</span> - Decryption successful...',
+            '<span class="red">[WARNING]</span> System integrity compromised',
             '<span class="yellow">[SYSTEM]</span> Loading Matrix Protocol...',
             '<span class="green">[OK]</span> Firewall: BYPASSED',
             '<span class="green">[OK]</span> Encryption: AES-256 CRACKED',
             '<span class="green">[OK]</span> VPN: CONNECTED // TUNIS',
             '<span class="green">[OK]</span> Matrix Rain: ENABLED',
             '<span class="green">[OK]</span> Audio: ENABLED',
+            '<span class="red">[ERROR]</span> Glitch detected in mainframe...',
             '',
-            '<span class="yellow">[ROOT@damas]</span>#./hack_the_planet.sh',
+            '<span class="yellow">[ROOT@damas]</span>#./hack_the_planet.sh --force',
             'Initializing exploit...',
             '<span class="red">[!] Mainframe access detected</span>',
             '<span class="green">[+] Port 22/tcp open ssh</span>',
             '<span class="green">[+] Port 443/tcp open https</span>',
             '<span class="cyan">[SUCCESS]</span> Welcome to the Matrix, Damas.',
             '',
-            '<span class="green">[+] SYSTEM COMPROMISED</span>',
-            '<span class="cyan">There is no spoon... Only code 🔥</span>',
+            '<span class="red">[+] SYSTEM GLITCHING</span>',
+            '<span class="cyan">Reality is breaking... Only code remains 🔥</span>',
             '',
             '<span class="yellow">[ROOT@damas]</span># <span class="cursor"></span>'
         ];
@@ -176,7 +191,7 @@
             if (lineIndex < lines.length) {
                 if (charIndex < lines[lineIndex].length) {
                     terminal.innerHTML = lines.slice(0, lineIndex).join('\n') + '\n' + lines[lineIndex].substring(0, charIndex + 1);
-                    playKeySound(); // هنا الصوت
+                    playKeySound();
                     charIndex++;
                     setTimeout(typeWriter, Math.random() * 40 + 20);
                 } else {
@@ -188,6 +203,16 @@
             } else {
                 terminal.innerHTML = lines.join('\n') + '<span class="cursor"></span>';
             }
+        }
+
+        // Glitch Effect كل 3 ثواني
+        function startGlitchEffect() {
+            setInterval(() => {
+                terminal.classList.add('glitch');
+                setTimeout(() => {
+                    terminal.classList.remove('glitch');
+                }, 300);
+            }, 3000);
         }
 
         window.addEventListener('resize', () => {
