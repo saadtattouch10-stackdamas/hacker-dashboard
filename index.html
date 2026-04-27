@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAMAS OS // Cracker</title>
+    <title>DAMAS OS // HACKED</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -54,6 +54,46 @@
             overflow-y: auto;
             display: none;
         }
+        #hackedScreen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        #hackedText {
+            font-size: 40px;
+            color: #ff0000;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+            animation: flicker 0.1s infinite, glitchHacked 0.3s infinite;
+            font-weight: bold;
+        }
+        #skull {
+            font-size: 80px;
+            margin: 20px 0;
+            animation: pulse 1s infinite;
+        }
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        @keyframes glitchHacked {
+            0% { transform: translate(0); }
+            20% { transform: translate(-5px, 5px); }
+            40% { transform: translate(-5px, -5px); }
+            60% { transform: translate(5px, 5px); }
+            80% { transform: translate(5px, -5px); }
+            100% { transform: translate(0); }
+        }
         #inputLine {
             display: flex;
             align-items: center;
@@ -84,22 +124,13 @@
    .yellow { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
    .cyan { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
    .purple { color: #ff00ff; text-shadow: 0 0 5px #ff00ff; }
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
-        }
-   .glitch { animation: glitch 0.3s; }
     </style>
 </head>
 <body>
     <div id="startScreen">
         <div style="margin-bottom:30px; text-align:center;">
-            <div class="cyan">DAMAS OS v4.0 CRACKER EDITION</div>
-            <div class="red">UNAUTHORIZED ACCESS DETECTED</div>
+            <div class="cyan">DAMAS OS v5.0 HACKED EDITION</div>
+            <div class="red">SYSTEM VULNERABLE</div>
         </div>
         <button id="startBtn">[ INITIATE BREACH ]</button>
     </div>
@@ -107,12 +138,21 @@
     <canvas id="matrix"></canvas>
     <div id="terminal"></div>
 
+    <div id="hackedScreen">
+        <div id="skull">💀</div>
+        <div id="hackedText">SYSTEM HACKED</div>
+        <div id="hackedText" style="font-size: 60px; margin: 20px 0;">BY DAMAS</div>
+        <div class="red" style="margin-top:30px; font-size:18px;">ALL YOUR BASE ARE BELONG TO US</div>
+        <div class="green" style="margin-top:40px;">Click anywhere to continue...</div>
+    </div>
+
     <script>
         const startScreen = document.getElementById('startScreen');
         const startBtn = document.getElementById('startBtn');
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         const terminal = document.getElementById('terminal');
+        const hackedScreen = document.getElementById('hackedScreen');
 
         let audioCtx;
         function playKeySound() {
@@ -141,6 +181,23 @@
             osc.stop(audioCtx.currentTime + 0.2);
         }
 
+        function playAlarmSound() {
+            if (!audioCtx) return;
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.value = 400;
+                    gain.gain.value = 0.1;
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }, i * 400);
+            }
+        }
+
         startBtn.onclick = () => {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             startScreen.style.display = 'none';
@@ -153,7 +210,7 @@
         function initMatrix() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            const chars = '01DAMAS';
+            const chars = '01DAMAS💀';
             const fontSize = 14;
             const columns = canvas.width / fontSize;
             const drops = Array(Math.floor(columns)).fill(1);
@@ -183,7 +240,7 @@
         }
 
         function startCracker() {
-            print('<span class="cyan">DAMAS OS v4.0 CRACKER</span> - Initializing...');
+            print('<span class="cyan">DAMAS OS v5.0 CRACKER</span> - Initializing...');
             print('<span class="red">[WARNING]</span> Brute force module loaded');
             print('<span class="green">[OK]</span> VPN: CONNECTED // TUNIS');
             print('<span class="green">[OK]</span> Proxy chains: ACTIVE');
@@ -207,9 +264,9 @@
             document.getElementById('inputLine').remove();
             print(`<span class="yellow">[TARGET]</span># ${target}`);
             print('');
-            print('<span class="cyan">[INIT]</span> Starting brute force attack...');
-            print('<span class="cyan">[INIT]</span> Charset: abcdefghijklmnopqrstuvwxyz0123456789');
-            print('<span class="cyan">[INIT]</span> Target hash: MD5');
+            print('<span class="cyan"></span> Starting brute force attack...');
+            print('<span class="cyan"></span> Charset: abcdefghijklmnopqrstuvwxyz0123456789');
+            print('<span class="cyan"></span> Target hash: MD5');
             print('');
 
             const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -219,7 +276,6 @@
                 print(`<span class="yellow">[ATTACK]</span> Cracking position ${i + 1}/${target.length}...`, false);
                 await sleep(300);
 
-                // محاكاة التجربة
                 for (let j = 0; j < 15; j++) {
                     let attempt = cracked + chars[Math.floor(Math.random() * chars.length)];
                     terminalContent = terminalContent.replace(/Cracking position.*/, `Cracking position ${i + 1}/${target.length}... [${attempt}]`);
@@ -236,31 +292,29 @@
                 print('');
             }
 
-            terminal.classList.add('glitch');
-            await sleep(300);
-            terminal.classList.remove('glitch');
-
+            await sleep(500);
             print('');
             print('<span class="red">[SUCCESS]</span> Password cracked!');
             print(`<span class="green">[+] Hash broken:</span> <span class="purple">${target}</span>`);
             print(`<span class="green">[+] Time elapsed:</span> ${(target.length * 1.7).toFixed(2)}s`);
             print(`<span class="green">[+] Attempts:</span> ${Math.floor(Math.random() * 90000 + 10000)}`);
             print('');
-            print('<span class="cyan">Reality is just a password... and we have the key 🔓</span>');
-            print('');
-            print('<span class="yellow">[ROOT@damas]</span>#./hydra --crack');
-            print('Enter target password to simulate crack:');
-            print('<div id="inputLine"><span class="yellow">[TARGET]</span># <input type="text" id="userInput" autofocus><span class="cursor"></span></div>');
+            print('<span class="red">[!!!] ROOT ACCESS GRANTED</span>');
+            await sleep(1000);
+            playAlarmSound();
+            print('<span class="red">[!!!] INITIATING SYSTEM OVERRIDE...</span>');
+            await sleep(2000);
 
-            isRunning = false;
-            const input = document.getElementById('userInput');
-            input.focus();
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' &&!isRunning) {
-                    const password = input.value;
-                    if (password) crackPassword(password);
-                }
-            });
+            // هنا الـ Final Screen
+            hackedScreen.style.display = 'flex';
+            terminal.style.display = 'none';
+
+            hackedScreen.onclick = () => {
+                hackedScreen.style.display = 'none';
+                terminal.style.display = 'block';
+                terminalContent = '';
+                startCracker();
+            };
         }
 
         function sleep(ms) {
