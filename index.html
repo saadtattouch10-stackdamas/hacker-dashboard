@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacker Terminal // Damas</title>
+    <title>DAMAS OS // Matrix</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -12,14 +12,27 @@
             font-family: 'Courier New', monospace;
             height: 100vh;
             overflow: hidden;
-            padding: 20px;
+        }
+        #matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
         #terminal {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
             font-size: 16px;
             line-height: 1.4;
             white-space: pre-wrap;
+            background: rgba(0,0,0,0.8);
+            height: 100vh;
+            overflow-y: auto;
         }
-       .cursor {
+      .cursor {
             display: inline-block;
             width: 10px;
             height: 18px;
@@ -30,45 +43,68 @@
             0%, 50% { opacity: 1; }
             51%, 100% { opacity: 0; }
         }
-       .green { color: #00ff00; }
-       .red { color: #ff0000; }
-       .yellow { color: #ffff00; }
-       .cyan { color: #00ffff; }
+      .green { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+      .red { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+      .yellow { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
+      .cyan { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
     </style>
 </head>
 <body>
+    <canvas id="matrix"></canvas>
     <div id="terminal"></div>
+    
     <script>
+        // Matrix Rain Effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff00';
+            ctx.font = fontSize + 'px monospace';
+            
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 35);
+
+        // Terminal Typewriter
         const terminal = document.getElementById('terminal');
         const lines = [
-            '<span class="cyan">DAMAS OS v2.0</span> - Initializing...',
-            '<span class="yellow">[SYSTEM]</span> Checking security protocols...',
+            '<span class="cyan">DAMAS OS v3.0 MATRIX EDITION</span> - Booting...',
+            '<span class="yellow">[SYSTEM]</span> Loading Matrix Protocol...',
             '<span class="green">[OK]</span> Firewall: ACTIVE',
             '<span class="green">[OK]</span> Encryption: AES-256 ENABLED',
             '<span class="green">[OK]</span> VPN: CONNECTED // TUNIS',
+            '<span class="green">[OK]</span> Matrix Rain: ENABLED',
             '',
             '<span class="yellow">[ROOT@damas]</span># nmap -sS -O target.gov',
-            'Starting Nmap 7.94...',
             'Scanning ports...',
             '<span class="green">[+] Port 22/tcp open ssh</span>',
             '<span class="green">[+] Port 80/tcp open http</span>',
-            '<span class="green">[+] Port 443/tcp open https</span>',
             '<span class="red">[!] Vulnerability detected: CVE-2024-1337</span>',
             '',
             '<span class="yellow">[ROOT@damas]</span># hydra -l admin -P rockyou.txt ssh://target.gov',
-            'Hydra starting... [DATA] 16 tasks, 1 server',
             '<span class="green">[22][ssh] host: target.gov login: admin password: damas123</span>',
-            '<span class="cyan">[SUCCESS]</span> Access granted. Welcome, Damas.',
+            '<span class="cyan">[SUCCESS]</span> Access granted. Welcome to the Matrix, Damas.',
             '',
-            '<span class="yellow">[ROOT@damas]</span># whoami',
-            'root',
-            '',
-            '<span class="yellow">[ROOT@damas]</span>#./exploit.sh',
-            'Injecting payload...',
-            'Bypassing IDS...',
             '<span class="green">[+] SYSTEM COMPROMISED</span>',
+            '<span class="cyan">There is no spoon... Only code 🔥</span>',
             '',
-            '<span class="cyan">Welcome to Hacker Dashboard by Damas 🔥</span>',
             '<span class="yellow">[ROOT@damas]</span># <span class="cursor"></span>'
         ];
 
@@ -80,21 +116,24 @@
                 if (charIndex < lines[lineIndex].length) {
                     terminal.innerHTML = lines.slice(0, lineIndex).join('\n') + '\n' + lines[lineIndex].substring(0, charIndex + 1);
                     charIndex++;
-                    setTimeout(typeWriter, Math.random() * 30 + 10); // سرعة الكتابة
+                    setTimeout(typeWriter, Math.random() * 30 + 10);
                 } else {
                     charIndex = 0;
                     lineIndex++;
                     terminal.innerHTML = lines.slice(0, lineIndex).join('\n') + '\n';
-                    setTimeout(typeWriter, 200); // وقفة بين السطور
+                    setTimeout(typeWriter, 200);
                 }
             } else {
-                // نخليو الـ cursor يرمش في الآخر
                 terminal.innerHTML = lines.join('\n') + '<span class="cursor"></span>';
             }
         }
+        setTimeout(typeWriter, 1500);
 
-        // نبداو بعد ثانية
-        setTimeout(typeWriter, 1000);
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     </script>
 </body>
 </html>
