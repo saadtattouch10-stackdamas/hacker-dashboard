@@ -1,1 +1,100 @@
-<h1>Hacker Dashboard by Damas 🔥</h1><p>الكنز طلع!</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Terminal // Damas</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            height: 100vh;
+            overflow: hidden;
+            padding: 20px;
+        }
+        #terminal {
+            font-size: 16px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+       .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: #00ff00;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+       .green { color: #00ff00; }
+       .red { color: #ff0000; }
+       .yellow { color: #ffff00; }
+       .cyan { color: #00ffff; }
+    </style>
+</head>
+<body>
+    <div id="terminal"></div>
+    <script>
+        const terminal = document.getElementById('terminal');
+        const lines = [
+            '<span class="cyan">DAMAS OS v2.0</span> - Initializing...',
+            '<span class="yellow">[SYSTEM]</span> Checking security protocols...',
+            '<span class="green">[OK]</span> Firewall: ACTIVE',
+            '<span class="green">[OK]</span> Encryption: AES-256 ENABLED',
+            '<span class="green">[OK]</span> VPN: CONNECTED // TUNIS',
+            '',
+            '<span class="yellow">[ROOT@damas]</span># nmap -sS -O target.gov',
+            'Starting Nmap 7.94...',
+            'Scanning ports...',
+            '<span class="green">[+] Port 22/tcp open ssh</span>',
+            '<span class="green">[+] Port 80/tcp open http</span>',
+            '<span class="green">[+] Port 443/tcp open https</span>',
+            '<span class="red">[!] Vulnerability detected: CVE-2024-1337</span>',
+            '',
+            '<span class="yellow">[ROOT@damas]</span># hydra -l admin -P rockyou.txt ssh://target.gov',
+            'Hydra starting... [DATA] 16 tasks, 1 server',
+            '<span class="green">[22][ssh] host: target.gov login: admin password: damas123</span>',
+            '<span class="cyan">[SUCCESS]</span> Access granted. Welcome, Damas.',
+            '',
+            '<span class="yellow">[ROOT@damas]</span># whoami',
+            'root',
+            '',
+            '<span class="yellow">[ROOT@damas]</span>#./exploit.sh',
+            'Injecting payload...',
+            'Bypassing IDS...',
+            '<span class="green">[+] SYSTEM COMPROMISED</span>',
+            '',
+            '<span class="cyan">Welcome to Hacker Dashboard by Damas 🔥</span>',
+            '<span class="yellow">[ROOT@damas]</span># <span class="cursor"></span>'
+        ];
+
+        let lineIndex = 0;
+        let charIndex = 0;
+
+        function typeWriter() {
+            if (lineIndex < lines.length) {
+                if (charIndex < lines[lineIndex].length) {
+                    terminal.innerHTML = lines.slice(0, lineIndex).join('\n') + '\n' + lines[lineIndex].substring(0, charIndex + 1);
+                    charIndex++;
+                    setTimeout(typeWriter, Math.random() * 30 + 10); // سرعة الكتابة
+                } else {
+                    charIndex = 0;
+                    lineIndex++;
+                    terminal.innerHTML = lines.slice(0, lineIndex).join('\n') + '\n';
+                    setTimeout(typeWriter, 200); // وقفة بين السطور
+                }
+            } else {
+                // نخليو الـ cursor يرمش في الآخر
+                terminal.innerHTML = lines.join('\n') + '<span class="cursor"></span>';
+            }
+        }
+
+        // نبداو بعد ثانية
+        setTimeout(typeWriter, 1000);
+    </script>
+</body>
+</html>
