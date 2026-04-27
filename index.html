@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,29 +13,56 @@
             height: 100vh;
             overflow: hidden;
         }
+        #startScreen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #startBtn {
+            background: transparent;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            text-shadow: 0 0 10px #00ff00;
+            box-shadow: 0 0 20px #00ff00;
+            transition: 0.3s;
+        }
+        #startBtn:hover {
+            background: #00ff00;
+            color: #000;
+        }
         #matrix {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: 1;
+            display: none;
         }
         #terminal {
             position: relative;
             z-index: 2;
             padding: 20px;
-            font-size: 16px;
+            font-size: 14px;
             line-height: 1.4;
             white-space: pre-wrap;
             background: rgba(0,0,0,0.8);
             height: 100vh;
             overflow-y: auto;
+            display: none;
         }
-      .cursor {
+     .cursor {
             display: inline-block;
-            width: 10px;
-            height: 18px;
+            width: 8px;
+            height: 16px;
             background: #00ff00;
             animation: blink 1s infinite;
         }
@@ -43,64 +70,98 @@
             0%, 50% { opacity: 1; }
             51%, 100% { opacity: 0; }
         }
-      .green { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
-      .red { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
-      .yellow { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
-      .cyan { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
+     .green { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+     .red { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+     .yellow { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
+     .cyan { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
     </style>
 </head>
 <body>
+    <div id="startScreen">
+        <div style="margin-bottom:30px; text-align:center;">
+            <div class="cyan">DAMAS OS v3.0 MATRIX EDITION</div>
+            <div class="green">SYSTEM LOCKED</div>
+        </div>
+        <button id="startBtn">[ CLICK TO DECRYPT ]</button>
+    </div>
+
     <canvas id="matrix"></canvas>
     <div id="terminal"></div>
-    
+
     <script>
-        // Matrix Rain Effect
+        const startScreen = document.getElementById('startScreen');
+        const startBtn = document.getElementById('startBtn');
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
-        const fontSize = 14;
-        const columns = canvas.width / fontSize;
-        const drops = Array(Math.floor(columns)).fill(1);
-
-        function drawMatrix() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#00ff00';
-            ctx.font = fontSize + 'px monospace';
-            
-            for (let i = 0; i < drops.length; i++) {
-                const text = chars[Math.floor(Math.random() * chars.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
-            }
-        }
-        setInterval(drawMatrix, 35);
-
-        // Terminal Typewriter
         const terminal = document.getElementById('terminal');
+
+        // صوت الكيبورد - نستعمل Web Audio API باش ما نحتاجوش ملف
+        let audioCtx;
+        function playKeySound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = 800 + Math.random() * 400;
+            gain.gain.value = 0.05;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        startBtn.onclick = () => {
+            // نفعل الصوت
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            startScreen.style.display = 'none';
+            canvas.style.display = 'block';
+            terminal.style.display = 'block';
+            initMatrix();
+            setTimeout(typeWriter, 1000);
+        };
+
+        // Matrix Rain
+        function initMatrix() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            const drops = Array(Math.floor(columns)).fill(1);
+
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00ff00';
+                ctx.font = fontSize + 'px monospace';
+                for (let i = 0; i < drops.length; i++) {
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            setInterval(drawMatrix, 35);
+        }
+
+        // Terminal
         const lines = [
-            '<span class="cyan">DAMAS OS v3.0 MATRIX EDITION</span> - Booting...',
+            '<span class="cyan">DAMAS OS v3.0</span> - Decryption successful...',
             '<span class="yellow">[SYSTEM]</span> Loading Matrix Protocol...',
-            '<span class="green">[OK]</span> Firewall: ACTIVE',
-            '<span class="green">[OK]</span> Encryption: AES-256 ENABLED',
+            '<span class="green">[OK]</span> Firewall: BYPASSED',
+            '<span class="green">[OK]</span> Encryption: AES-256 CRACKED',
             '<span class="green">[OK]</span> VPN: CONNECTED // TUNIS',
             '<span class="green">[OK]</span> Matrix Rain: ENABLED',
+            '<span class="green">[OK]</span> Audio: ENABLED',
             '',
-            '<span class="yellow">[ROOT@damas]</span># nmap -sS -O target.gov',
-            'Scanning ports...',
+            '<span class="yellow">[ROOT@damas]</span>#./hack_the_planet.sh',
+            'Initializing exploit...',
+            '<span class="red">[!] Mainframe access detected</span>',
             '<span class="green">[+] Port 22/tcp open ssh</span>',
-            '<span class="green">[+] Port 80/tcp open http</span>',
-            '<span class="red">[!] Vulnerability detected: CVE-2024-1337</span>',
-            '',
-            '<span class="yellow">[ROOT@damas]</span># hydra -l admin -P rockyou.txt ssh://target.gov',
-            '<span class="green">[22][ssh] host: target.gov login: admin password: damas123</span>',
-            '<span class="cyan">[SUCCESS]</span> Access granted. Welcome to the Matrix, Damas.',
+            '<span class="green">[+] Port 443/tcp open https</span>',
+            '<span class="cyan">[SUCCESS]</span> Welcome to the Matrix, Damas.',
             '',
             '<span class="green">[+] SYSTEM COMPROMISED</span>',
             '<span class="cyan">There is no spoon... Only code 🔥</span>',
@@ -115,8 +176,9 @@
             if (lineIndex < lines.length) {
                 if (charIndex < lines[lineIndex].length) {
                     terminal.innerHTML = lines.slice(0, lineIndex).join('\n') + '\n' + lines[lineIndex].substring(0, charIndex + 1);
+                    playKeySound(); // هنا الصوت
                     charIndex++;
-                    setTimeout(typeWriter, Math.random() * 30 + 10);
+                    setTimeout(typeWriter, Math.random() * 40 + 20);
                 } else {
                     charIndex = 0;
                     lineIndex++;
@@ -127,9 +189,7 @@
                 terminal.innerHTML = lines.join('\n') + '<span class="cursor"></span>';
             }
         }
-        setTimeout(typeWriter, 1500);
 
-        // Resize canvas on window resize
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
