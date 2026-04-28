@@ -202,7 +202,25 @@
             print('<span class="purple thinking">[AI]</span> Thinking...');
             
             try {
-                const response = await fetch('https://ai.hackclub.com/chat/completions', {
+                let response;
+try {
+    response = await fetch('https://ai.hackclub.com/chat/completions', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ messages: chatHistory })
+    });
+    if (!response.ok) throw new Error('HackClub failed');
+} catch (e) {
+    // API احتياطي كان الاول ما خدمش
+    response = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            messages: chatHistory,
+            model: 'openai'
+        })
+    });
+}
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
