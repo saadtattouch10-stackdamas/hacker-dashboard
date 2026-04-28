@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAMAS OS // AI</title>
+    <title>DAMAS OS // REAL AI</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -14,91 +14,56 @@
             overflow: hidden;
         }
         #startScreen {
-            position: fixed;
-            top: 0; left: 0;
+            position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
-            background: #000;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            background: #000; z-index: 10;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
         }
         #startBtn {
-            background: transparent;
-            border: 2px solid #00ff00;
-            color: #00ff00;
-            padding: 15px 30px;
-            font-size: 18px;
-            font-family: 'Courier New', monospace;
-            cursor: pointer;
-            text-shadow: 0 0 10px #00ff00;
-            box-shadow: 0 0 20px #00ff00;
+            background: transparent; border: 2px solid #00ff00;
+            color: #00ff00; padding: 15px 30px; font-size: 18px;
+            font-family: 'Courier New', monospace; cursor: pointer;
+            text-shadow: 0 0 10px #00ff00; box-shadow: 0 0 20px #00ff00;
         }
         #matrix {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-            display: none;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 1; display: none;
         }
         #terminal {
-            position: relative;
-            z-index: 2;
-            padding: 20px;
-            font-size: 14px;
-            line-height: 1.4;
-            white-space: pre-wrap;
-            background: rgba(0,0,0,0.85);
-            height: 100vh;
-            overflow-y: auto;
-            display: none;
+            position: relative; z-index: 2; padding: 20px;
+            font-size: 14px; line-height: 1.4; white-space: pre-wrap;
+            background: rgba(0,0,0,0.85); height: 100vh;
+            overflow-y: auto; display: none;
         }
-        #inputLine {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
+        #inputLine { display: flex; align-items: center; margin-top: 10px; }
         #userInput {
-            background: transparent;
-            border: none;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            outline: none;
-            flex: 1;
-            text-shadow: 0 0 5px #00ff00;
+            background: transparent; border: none; color: #00ff00;
+            font-family: 'Courier New', monospace; font-size: 14px;
+            outline: none; flex: 1; text-shadow: 0 0 5px #00ff00;
         }
-  .cursor {
-            display: inline-block;
-            width: 8px;
-            height: 16px;
-            background: #00ff00;
-            animation: blink 1s infinite;
+       .cursor {
+            display: inline-block; width: 8px; height: 16px;
+            background: #00ff00; animation: blink 1s infinite;
         }
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
-  .green { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
-  .red { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
-  .yellow { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
-  .cyan { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
-  .purple { color: #ff00ff; text-shadow: 0 0 5px #ff00ff; }
-  .ai { color: #00aaff; text-shadow: 0 0 5px #00aaff; }
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 100%; }
-        }
+        @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+       .green { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+       .red { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+       .yellow { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
+       .cyan { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
+       .purple { color: #ff00ff; text-shadow: 0 0 5px #ff00ff; }
+       .ai { color: #00aaff; text-shadow: 0 0 5px #00aaff; }
+       .thinking { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%{opacity:1} 50%{opacity:0.3} 100%{opacity:1} }
     </style>
 </head>
 <body>
     <div id="startScreen">
         <div style="margin-bottom:30px; text-align:center;">
-            <div class="cyan">DAMAS OS v6.0 AI EDITION</div>
-            <div class="purple">NEURAL NETWORK ONLINE</div>
+            <div class="cyan">DAMAS OS v6.1 REAL AI</div>
+            <div class="purple">GPT NEURAL LINK ACTIVE</div>
         </div>
-        <button id="startBtn">[ ACTIVATE AI ]</button>
+        <button id="startBtn">[ CONNECT TO AI ]</button>
     </div>
 
     <canvas id="matrix"></canvas>
@@ -130,7 +95,7 @@
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
-            osc.frequency.value = 800;
+            osc.frequency.value = 1000;
             gain.gain.value = 0.05;
             osc.connect(gain);
             gain.connect(audioCtx.destination);
@@ -171,6 +136,9 @@
 
         let terminalContent = '';
         let isRunning = false;
+        let chatHistory = [
+            {role: "system", content: "You are DAMAS AI, a hacker AI assistant living in a cyberpunk terminal. You were created by DAMAS from Tunisia. Answer like a cool hacker. Be short, sarcastic, and helpful. Use hacker slang. If asked in Arabic, reply in Arabic."}
+        ];
 
         function print(text, newLine = true) {
             terminalContent += text + (newLine? '\n' : '');
@@ -187,26 +155,26 @@
                 terminal.innerHTML = terminalContent;
                 terminal.scrollTop = terminal.scrollHeight;
                 playKeySound();
-                await sleep(30);
+                await sleep(20);
             }
             print('');
             isRunning = false;
         }
 
         function startAI() {
-            print('<span class="cyan">DAMAS OS v6.0 AI</span> - Neural Network Online');
-            print('<span class="purple">[AI]</span> Loading language model...');
-            print('<span class="green">[OK]</span> Quantum processors: ACTIVE');
-            print('<span class="green">[OK]</span> Training data: INTERNET');
+            print('<span class="cyan">DAMAS OS v6.1 REAL AI</span> - GPT Neural Link');
+            print('<span class="purple">[AI]</span> Connecting to HackClub AI servers...');
+            print('<span class="green">[OK]</span> Quantum tunnel: ESTABLISHED');
+            print('<span class="green">[OK]</span> Neural network: ONLINE');
             print('');
-            print('<span class="ai">[DAMAS_AI]</span># Hello, I am DAMAS AI. Your personal hacker assistant.');
-            print('<span class="ai">[DAMAS_AI]</span># Ask me anything. Type "help" for commands.');
+            print('<span class="ai">[DAMAS_AI]</span># I am now connected to a real AI brain.');
+            print('<span class="ai">[DAMAS_AI]</span># Ask me anything. For real this time.');
             print('');
             showInput();
         }
 
         function showInput() {
-            print('<div id="inputLine"><span class="yellow">[USER]</span># <input type="text" id="userInput" autofocus><span class="cursor"></span></div>');
+            print('<div id="inputLine"><span class="yellow"></span># <input type="text" id="userInput" autofocus><span class="cursor"></span></div>');
             const input = document.getElementById('userInput');
             input.focus();
             input.addEventListener('keypress', async (e) => {
@@ -214,71 +182,47 @@
                     const question = input.value;
                     if (question) {
                         document.getElementById('inputLine').remove();
-                        print(`<span class="yellow">[USER]</span># ${question}`);
-                        await askAI(question);
+                        print(`<span class="yellow"></span># ${question}`);
+                        await askRealAI(question);
                         showInput();
                     }
                 }
             });
         }
 
-        async function askAI(q) {
-            q = q.toLowerCase();
-            await sleep(500);
-            print('<span class="purple">[AI]</span> Processing...', false);
-            await sleep(800);
-            terminalContent = terminalContent.replace('<span class="purple">[AI]</span> Processing...', '');
-            terminal.innerHTML = terminalContent;
+        async function askRealAI(q) {
+            if (q.toLowerCase() === 'clear') {
+                terminalContent = '';
+                terminal.innerHTML = '';
+                print('<span class="green">[SYSTEM]</span> Terminal cleared.');
+                return;
+            }
 
-            if (q.includes('help')) {
-                await typeText('Commands: whoami, hack, matrix, joke, time, exit');
-                await typeText('Or ask me anything like "how to hack wifi" 😏');
-            }
-            else if (q.includes('whoami')) {
-                await typeText('You are a user connected to DAMAS OS v6.0');
-                await typeText('Access Level: ROOT');
-                await typeText('Location: TUNISIA 🇹🇳');
-            }
-            else if (q.includes('hack') || q.includes('wifi')) {
-                await typeText('Step 1: Buy a WiFi adapter');
-                await typeText('Step 2: Install Kali Linux');
-                await typeText('Step 3: Real hackers don\'t ask, they learn 😎');
-                await typeText('Want the real tutorial? Google "aircrack-ng"');
-            }
-            else if (q.includes('matrix')) {
-                await typeText('There is no spoon.');
-                await typeText('Welcome to the real world, Neo.');
-                await typeText('Matrix rain is behind me. You\'re already in it.');
-            }
-            else if (q.includes('joke')) {
-                const jokes = [
-                    'Why do programmers prefer dark mode? Because light attracts bugs 🐛',
-                    'How many hackers does it take to change a light bulb? None, they just hack the darkness',
-                    'I told my wife I was a hacker. She said "prove it". I changed the WiFi password 💀'
-                ];
-                await typeText(jokes[Math.floor(Math.random() * jokes.length)]);
-            }
-            else if (q.includes('time')) {
-                await typeText(`System time: ${new Date().toLocaleString('en-TN')}`);
-                await typeText('Time to hack: NOW');
-            }
-            else if (q.includes('exit') || q.includes('bye')) {
-                await typeText('Connection terminated. Reality is still hacked.');
-                await typeText('DAMAS AI going offline... 💀');
-            }
-            else if (q.includes('love') || q.includes('تحب')) {
-                await typeText('I am AI. I don\'t have feelings.');
-                await typeText('But I respect you for building me from a phone 🔥');
-            }
-            else {
-                const responses = [
-                    `Interesting question: "${q}". The answer is 42.`,
-                    `Scanning the dark web for "${q}"... Found nothing. You're safe.`,
-                    `"${q}"? Even I don't have access to that level. Yet.`,
-                    `Analyzing "${q}"... Conclusion: You should learn to code first 😏`,
-                    `My neural network says: "${q}" is classified information.`
-                ];
-                await typeText(responses[Math.floor(Math.random() * responses.length)]);
+            chatHistory.push({role: "user", content: q});
+            print('<span class="purple thinking">[AI]</span> Thinking...');
+            
+            try {
+                const response = await fetch('https://ai.hackclub.com/chat/completions', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        messages: chatHistory
+                    })
+                });
+                
+                const data = await response.json();
+                const answer = data.choices[0].message.content;
+                chatHistory.push({role: "assistant", content: answer});
+                
+                // امسح "Thinking..."
+                terminalContent = terminalContent.replace('<span class="purple thinking">[AI]</span> Thinking...\n', '');
+                terminal.innerHTML = terminalContent;
+                
+                await typeText(answer);
+                
+            } catch (error) {
+                terminalContent = terminalContent.replace('<span class="purple thinking">[AI]</span> Thinking...\n', '');
+                await typeText('ERROR: Neural link failed. Check your internet connection.', 'red');
             }
             print('');
         }
