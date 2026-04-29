@@ -69,7 +69,7 @@
             print('<span class="purple thinking">[AI]</span> Thinking...');
             let answer = '';
             try {
-                let res = await fetch('https://ai.hackclub.com/chat/completions', {
+               let res = await fetch('https://api.pawan.krd/cosmosrp/v1/chat/completions', {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ messages: chatHistory })
                 });
