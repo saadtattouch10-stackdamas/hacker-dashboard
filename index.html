@@ -69,10 +69,13 @@
             print('<span class="purple thinking">[AI]</span> Thinking...');
             let answer = '';
             try {
-               let res = await fetch('https://api.pawan.krd/cosmosrp/v1/chat/completions', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ messages: chatHistory })
-                });
+               let res = await fetch('https://free.churchless.tech/v1/chat/completions', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ 
+        model: 'gpt-3.5-turbo',
+        messages: chatHistory 
+    })
+});
                 if (!res.ok) throw new Error('HackClub down');
                 let data = await res.json();
                 answer = data.choices[0].message.content;
