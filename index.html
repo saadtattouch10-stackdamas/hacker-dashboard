@@ -179,7 +179,7 @@
             input.focus();
             input.addEventListener('keypress', async (e) => {
                 if (e.key === 'Enter' &&!isRunning) {
-                    const question = input.value;
+                    const command = input.value;
                     if (question) {
                         document.getElementById('inputLine').remove();
                         print(`<span class="yellow"></span># ${question}`);
