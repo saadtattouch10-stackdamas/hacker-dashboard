@@ -190,60 +190,7 @@
             });
         }
 
-        async function askRealAI(q) {
-            if (q.toLowerCase() === 'clear') {
-                terminalContent = '';
-                terminal.innerHTML = '';
-                print('<span class="green">[SYSTEM]</span> Terminal cleared.');
-                return;
-            }
-
-            chatHistory.push({role: "user", content: q});
-            print('<span class="purple thinking">[AI]</span> Thinking...');
-            
-            try {
-                let response;
-try {
-    response = await fetch('https://ai.hackclub.com/chat/completions', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ messages: chatHistory })
-    });
-    if (!response.ok) throw new Error('HackClub failed');
-} catch (e) {
-    // API احتياطي كان الاول ما خدمش
-    response = await fetch('https://text.pollinations.ai/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            messages: chatHistory,
-            model: 'openai'
-        })
-    });
-}
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        messages: chatHistory
-                    })
-                });
-                
-                const data = await response.json();
-                const answer = data.choices[0].message.content;
-                chatHistory.push({role: "assistant", content: answer});
-                
-                // امسح "Thinking..."
-                terminalContent = terminalContent.replace('<span class="purple thinking">[AI]</span> Thinking...\n', '');
-                terminal.innerHTML = terminalContent;
-                
-                await typeText(answer);
-                
-            } catch (error) {
-                terminalContent = terminalContent.replace('<span class="purple thinking">[AI]</span> Thinking...\n', '');
-                await typeText('ERROR: Neural link failed. Check your internet connection.', 'red');
-            }
-            print('');
-        }
+        https://github.com/USERNAME/hacker-dashboard-sigma
 
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
