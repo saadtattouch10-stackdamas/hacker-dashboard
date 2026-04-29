@@ -3,203 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAMAS OS // REAL AI</title>
+    <title>DAMAS OS v6.4</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #000;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            height: 100vh;
-            overflow: hidden;
-        }
-        #startScreen {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #000; z-index: 10;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-        }
-        #startBtn {
-            background: transparent; border: 2px solid #00ff00;
-            color: #00ff00; padding: 15px 30px; font-size: 18px;
-            font-family: 'Courier New', monospace; cursor: pointer;
-            text-shadow: 0 0 10px #00ff00; box-shadow: 0 0 20px #00ff00;
-        }
-        #matrix {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; z-index: 1; display: none;
-        }
-        #terminal {
-            position: relative; z-index: 2; padding: 20px;
-            font-size: 14px; line-height: 1.4; white-space: pre-wrap;
-            background: rgba(0,0,0,0.85); height: 100vh;
-            overflow-y: auto; display: none;
-        }
-        #inputLine { display: flex; align-items: center; margin-top: 10px; }
-        #userInput {
-            background: transparent; border: none; color: #00ff00;
-            font-family: 'Courier New', monospace; font-size: 14px;
-            outline: none; flex: 1; text-shadow: 0 0 5px #00ff00;
-        }
-       .cursor {
-            display: inline-block; width: 8px; height: 16px;
-            background: #00ff00; animation: blink 1s infinite;
-        }
-        @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
-       .green { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
-       .red { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
-       .yellow { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
-       .cyan { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
-       .purple { color: #ff00ff; text-shadow: 0 0 5px #ff00ff; }
-       .ai { color: #00aaff; text-shadow: 0 0 5px #00aaff; }
-       .thinking { animation: pulse 1s infinite; }
-        @keyframes pulse { 0%{opacity:1} 50%{opacity:0.3} 100%{opacity:1} }
+        body { background: #000; color: #0f0; font-family: monospace; margin: 0; padding: 10px; }
+       .green { color: #0f0; }.purple { color: #a020f0; }.blue { color: #00ffff; }
+        #terminal { white-space: pre-wrap; word-wrap: break-word; }
+       .input-line { display: flex; align-items: center; margin-top: 10px; }
+       .terminal-input { background: #000; border: none; color: #0f0; font-family: monospace; font-size: 16px; outline: none; flex-grow: 1; }
+       .send-btn { background:#0f0; color:#000; border:none; padding:5px 15px; margin-left:5px; font-family:monospace; font-weight:bold; }
+       .thinking { animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
-    <div id="startScreen">
-        <div style="margin-bottom:30px; text-align:center;">
-            <div class="cyan">DAMAS OS v6.1 REAL AI</div>
-            <div class="purple">GPT NEURAL LINK ACTIVE</div>
-        </div>
-        <button id="startBtn">[ CONNECT TO AI ]</button>
+    <div id="terminal"></div>
+    <div class="input-line" id="input-container" style="display:none;">
+        <span class="prompt"># </span>
+        <input type="text" class="terminal-input" id="terminal-input" autocomplete="off">
+        <button class="send-btn" onclick="sendCommand()">SEND</button>
     </div>
 
-    <canvas id="matrix"></canvas>
-    <div id="terminal"></div>
-
     <script>
-        const startScreen = document.getElementById('startScreen');
-        const startBtn = document.getElementById('startBtn');
-        const canvas = document.getElementById('matrix');
-        const ctx = canvas.getContext('2d');
         const terminal = document.getElementById('terminal');
+        const input = document.getElementById('terminal-input');
+        const inputContainer = document.getElementById('input-container');
+        let terminalContent = '';
+        let chatHistory = [];
 
-        let audioCtx;
-        function playKeySound() {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.value = 600 + Math.random() * 600;
-            gain.gain.value = 0.03;
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.03);
+        function print(text) {
+            terminalContent += text + '\n';
+            terminal.innerHTML = terminalContent;
+            window.scrollTo(0, document.body.scrollHeight);
         }
 
-        function playAISound() {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = 1000;
-            gain.gain.value = 0.05;
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+        async function typeText(text) {
+            for (let char of text) {
+                terminalContent += char;
+                terminal.innerHTML = terminalContent;
+                await new Promise(r => setTimeout(r, 5));
+            }
+            terminalContent += '\n';
         }
 
-        startBtn.onclick = () => {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            startScreen.style.display = 'none';
-            canvas.style.display = 'block';
-            terminal.style.display = 'block';
-            initMatrix();
-            setTimeout(startAI, 1000);
-        };
+        function showInput() { inputContainer.style.display = 'flex'; input.focus(); }
+        
+        function sendCommand() {
+            const command = input.value;
+            if (!command) return;
+            print(`<span class="green"># </span>${command}`);
+            input.value = '';
+            askRealAI(command);
+        }
 
-        function initMatrix() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            const chars = '01DAMAS_AI';
-            const fontSize = 14;
-            const columns = canvas.width / fontSize;
-            const drops = Array(Math.floor(columns)).fill(1);
-            function drawMatrix() {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#00ff00';
-                ctx.font = fontSize + 'px monospace';
-                for (let i = 0; i < drops.length; i++) {
-                    const text = chars[Math.floor(Math.random() * chars.length)];
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                    drops[i]++;
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendCommand();
+        });
+
+        async function askRealAI(q) {
+            if (q.toLowerCase() === 'clear') {
+                terminalContent = ''; terminal.innerHTML = '';
+                print('<span class="green">[SYSTEM]</span> Terminal cleared.');
+                return;
+            }
+            chatHistory.push({role: "user", content: q});
+            print('<span class="purple thinking">[AI]</span> Thinking...');
+            let answer = '';
+            try {
+                let res = await fetch('https://ai.hackclub.com/chat/completions', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ messages: chatHistory })
+                });
+                if (!res.ok) throw new Error('HackClub down');
+                let data = await res.json();
+                answer = data.choices[0].message.content;
+            } catch (e) {
+                try {
+                    let res = await fetch('https://text.pollinations.ai/', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ messages: chatHistory, model: 'openai' })
+                    });
+                    let data = await res.json();
+                    answer = data;
+                } catch (e2) {
+                    answer = 'ERROR: Both neural links failed. Check your internet, boss.';
                 }
             }
-            setInterval(drawMatrix, 35);
-        }
-
-        let terminalContent = '';
-        let isRunning = false;
-        let chatHistory = [
-            {role: "system", content: "You are DAMAS AI, a hacker AI assistant living in a cyberpunk terminal. You were created by DAMAS from Tunisia. Answer like a cool hacker. Be short, sarcastic, and helpful. Use hacker slang. If asked in Arabic, reply in Arabic."}
-        ];
-
-        function print(text, newLine = true) {
-            terminalContent += text + (newLine? '\n' : '');
+            chatHistory.push({role: "assistant", content: answer});
+            terminalContent = terminalContent.replace('<span class="purple thinking">[AI]</span> Thinking...\n', '');
             terminal.innerHTML = terminalContent;
-            terminal.scrollTop = terminal.scrollHeight;
-        }
-
-        async function typeText(text, className = 'ai') {
-            isRunning = true;
-            playAISound();
-            print(`<span class="${className}">[DAMAS_AI]</span># `, false);
-            for (let i = 0; i < text.length; i++) {
-                terminalContent += text[i];
-                terminal.innerHTML = terminalContent;
-                terminal.scrollTop = terminal.scrollHeight;
-                playKeySound();
-                await sleep(20);
-            }
+            await typeText(answer);
             print('');
-            isRunning = false;
         }
 
-        function startAI() {
-            print('<span class="cyan">DAMAS OS v6.1 REAL AI</span> - GPT Neural Link');
+        async function connectToAI() {
+            print('<span class="blue">DAMAS OS v6.4 REAL AI - GPT Neural Link</span>');
             print('<span class="purple">[AI]</span> Connecting to HackClub AI servers...');
+            await new Promise(r => setTimeout(r, 1000));
             print('<span class="green">[OK]</span> Quantum tunnel: ESTABLISHED');
             print('<span class="green">[OK]</span> Neural network: ONLINE');
             print('');
-            print('<span class="ai">[DAMAS_AI]</span># I am now connected to a real AI brain.');
-            print('<span class="ai">[DAMAS_AI]</span># Ask me anything. For real this time.');
+            print('<span class="purple">[DAMAS_AI]</span># I am now connected to a real AI brain.');
+            print('<span class="purple">[DAMAS_AI]</span># Ask me anything. For real this time.');
             print('');
             showInput();
         }
 
-        function showInput() {
-            print('<div id="inputLine"><span class="yellow"></span># <input type="text" id="userInput" autofocus><span class="cursor"></span></div>');
-            const input = document.getElementById('userInput');
-            input.focus();
-            input.addEventListener('keypress', async (e) => {
-                if (e.key === 'Enter' &&!isRunning) {
-                    const command = input.value;
-                    if (question) {
-                        document.getElementById('inputLine').remove();
-                        print(`<span class="yellow"></span># ${question}`);
-                        await askRealAI(question);
-                        showInput();
-                    }
-                }
-            });
-        }
-
-        https://github.com/USERNAME/hacker-dashboard-sigma
-
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+        window.onload = () => {
+            print('<span class="blue">[ BOOTING DAMAS OS v6.4 ]</span>');
+            print('<button onclick="connectToAI()" style="background:#00ffff; color:#000; border:none; padding:10px; font-family:monospace; font-weight:bold; margin:10px 0;">[ CONNECT TO AI ]</button>');
+        };
     </script>
 </body>
 </html>
