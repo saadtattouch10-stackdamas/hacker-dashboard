@@ -1,18 +1,28 @@
 export default async function handler(req, res) {
-  const { prompt } = req.body;
-  
-  const response = await fetch("https://ai.hackclub.com/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      messages: [{ role: "user", content: prompt }]
-    })
-  });
+  if (req.method!== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-  const data = await response.json();
-  
-  // تأكد انك ترجع array أو object فيه [0]
-  res.status(200).json({ 
-    reply: data.choices?.[0]?.message?.content || "مافماش رد" 
-  });
+  try {
+    const hackClubRes = await fetch('https://ai.hackclub.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.1-8b-instruct', // هذا هو السطر الناقص
+        messages: req.body.messages
+      })
+    });
+
+    const data = await hackClubRes.json();
+    
+    // كان الـ API رجع Error نرجعوه
+    if (data.error) {
+      return res.status(500).json({ error: data.error.message });
+    }
+    
+    res.status(200).json(data);
+    
+  } catch (error) {
+    res.status(500).json({ error: 'AI Server Error: ' + error.message });
+  }
 }
