@@ -1,105 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAMAS OS v6.4</title>
+    <title>DAMAS OS v6.5</title>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; margin: 0; padding: 10px; }
-        .green { color: #0f0; }
-        .purple { color: #c678dd; }
-        .red { color: #e06c75; }
-        #terminal { white-space: pre-wrap; min-height: 80vh; margin-bottom: 10px; }
-        .input-line { display: flex; align-items: center; }
-        .terminal-input { background: #111; border: 1px solid #0f0; color: #0f0; flex: 1; padding: 5px; outline: none; }
-        .send-btn { background:#0f0; color:#000; border:none; padding:5px 15px; margin-left:5px; cursor:pointer; font-weight:bold; }
-        .send-btn:hover { background:#0c0; }
-        .thinking { animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #terminal {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+       .input-line {
+            display: flex;
+            padding: 10px 15px;
+            border-top: 1px solid #00ff00;
+        }
+        #prompt { color: #00ff00; margin-left: 8px; }
+        #command {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+        }
+        #send {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 5px 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+       .error { color: #ff0000; }
+       .success { color: #00ffff; }
+       .info { color: #ffff00; }
     </style>
 </head>
 <body>
-    <div id="terminal"></div>
-    <div class="input-line" id="input-container">
-        <span class="prompt"># </span>
-        <input type="text" class="terminal-input" id="cmdInput" placeholder="اكتب 'api' باش تكلم السيرفر">
-        <button class="send-btn" onclick="handleCommand()">Send</button>
+    <div id="terminal">DAMAS OS v6.5 - Neural Link Active
+اكتب 'help' باش تشوف الاوامر
+اكتب 'api' و بعدها سؤالك باش تحكي مع الـ AI
+
+</div>
+    <div class="input-line">
+        <span id="prompt">#</span>
+        <input type="text" id="command" placeholder="اكتب امر هنا..." autofocus>
+        <button id="send">Send</button>
     </div>
 
     <script>
         const terminal = document.getElementById('terminal');
-        const input = document.getElementById('cmdInput');
-        const inputContainer = document.getElementById('input-container');
-        let terminalContent = '';
-        let chatHistory = [];
+        const commandInput = document.getElementById('command');
+        const sendBtn = document.getElementById('send');
 
-        function addLine(text, className = '') {
-            terminalContent += `<span class="${className}">${text}</span>\n`;
-            terminal.innerHTML = terminalContent;
-            window.scrollTo(0, document.body.scrollHeight);
+        function addOutput(text, className = '') {
+            const line = document.createElement('div');
+            if (className) line.className = className;
+            line.textContent = text;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
         }
 
-        function handleCommand() {
-            const cmd = input.value.trim();
-            if (!cmd) return;
-            
-            addLine(`# ${cmd}`, 'purple');
-            input.value = '';
-            
-            if (cmd === 'clear') {
-                terminalContent = '';
-                terminal.innerHTML = '';
-                return;
+        async function runCommand() {
+            const fullCommand = commandInput.value.trim();
+            if (!fullCommand) return;
+
+            addOutput(`# ${fullCommand}`);
+            commandInput.value = '';
+
+            const parts = fullCommand.split(' ');
+            const cmd = parts[0].toLowerCase();
+            const args = parts.slice(1).join(' ');
+
+            if (cmd === 'help') {
+                addOutput('الاوامر المتاحة:', 'info');
+                addOutput('api [سؤالك] - تحكي مع DAMAS AI');
+                addOutput('clear - تمسح الشاشة');
+                addOutput('help - تشوف الاوامر');
+            } 
+            else if (cmd === 'clear') {
+                terminal.innerHTML = 'DAMAS OS v6.5 - Neural Link Active\n\n';
             }
-            
-            if (cmd === 'api') {
-                callAPI();
-            } else if (cmd === 'help') {
-                addLine('الأوامر المتاحة:', 'green');
-                addLine('api   - يكلم الـ API ويغلب الـ Boss', 'green');
-                addLine('clear - يمسح الـ terminal', 'green');
-                addLine('help  - يظهر المساعدة هاذي', 'green');
-            } else {
-                addLine(`Command not found: ${cmd}`, 'red');
+            else if (cmd === 'api') {
+                if (!args) {
+                    addOutput('استعمل: api شنوا سؤالك؟', 'error');
+                    return;
+                }
+                
+                addOutput('Connecting...', 'info');
+                try {
+                    const res = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            messages: [{ role: 'user', content: args }]
+                        })
+                    });
+
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    
+                    const data = await res.json();
+                    const reply = data.choices[0].message.content;
+                    addOutput(reply, 'success');
+                    
+                } catch (err) {
+                    addOutput(`خطأ: ${err.message}`, 'error');
+                    addOutput('تأكد انك عملت ملف api/ai.js', 'error');
+                }
+            } 
+            else {
+                addOutput(`Command not found: ${cmd}`, 'error');
             }
         }
 
-        async function callAPI() {
-            addLine('نحاولو نغلبو الـ Boss...', 'green');
-            addLine('Connecting...', 'thinking');
-            
-            try {
-                const res = await fetch('/api/data') // هذا يمشي عبر vercel.json proxy
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                
-                const data = await res.json();
-                // نحي سطر thinking
-                terminalContent = terminalContent.replace(/<span class="thinking">.*<\/span>\n/, '');
-                terminal.innerHTML = terminalContent;
-                
-                addLine('غلبنا الـ Boss بنجاح! 🎉', 'green');
-                addLine(JSON.stringify(data, null, 2), 'purple');
-                
-            } catch (err) {
-                terminalContent = terminalContent.replace(/<span class="thinking">.*<\/span>\n/, '');
-                terminal.innerHTML = terminalContent;
-                
-                addLine(`الـ Boss ضربنا: ${err.message}`, 'red');
-                addLine('باش نعاود المحاولة بعد 2 ثواني...', 'red');
-                setTimeout(callAPI, 2000);
-            }
-        }
-
-        // Enter key support
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleCommand();
-        });
-
-        // بداية
-        addLine('DAMAS OS v6.4 - Level 99 Edition', 'green');
-        addLine('اكتب "help" باش تشوف الأوامر', 'green');
-        addLine('اكتب "api" باش تهاجم الـ Boss', 'purple');
-        addLine('----------------------------------', 'green');
+        sendBtn.onclick = runCommand;
+        commandInput.onkeydown = (e) => {
+            if (e.key === 'Enter') runCommand();
+        };
     </script>
 </body>
 </html>
