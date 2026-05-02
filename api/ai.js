@@ -1,21 +1,18 @@
 export default async function handler(req, res) {
-  if (req.method!== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  const { prompt } = req.body;
+  
+  const response = await fetch("https://ai.hackclub.com/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
 
-  try {
-    const response = await fetch('https://ai.hackclub.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(req.body)
-    });
-
-    const data = await response.json();
-    res.status(200).json(data);
-    
-  } catch (error) {
-    res.status(500).json({ error: 'AI Server Error' });
-  }
+  const data = await response.json();
+  
+  // تأكد انك ترجع array أو object فيه [0]
+  res.status(200).json({ 
+    reply: data.choices?.[0]?.message?.content || "مافماش رد" 
+  });
 }
