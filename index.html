@@ -6,115 +6,100 @@
     <title>DAMAS OS v6.4</title>
     <style>
         body { background: #000; color: #0f0; font-family: monospace; margin: 0; padding: 10px; }
-       .green { color: #0f0; }.purple { color: #a020f0; }.blue { color: #00ffff; }
-        #terminal { white-space: pre-wrap; word-wrap: break-word; }
-       .input-line { display: flex; align-items: center; margin-top: 10px; }
-       .terminal-input { background: #000; border: none; color: #0f0; font-family: monospace; font-size: 16px; outline: none; flex-grow: 1; }
-       .send-btn { background:#0f0; color:#000; border:none; padding:5px 15px; margin-left:5px; font-family:monospace; font-weight:bold; }
-       .thinking { animation: blink 1s infinite; }
+        .green { color: #0f0; }
+        .purple { color: #c678dd; }
+        .red { color: #e06c75; }
+        #terminal { white-space: pre-wrap; min-height: 80vh; margin-bottom: 10px; }
+        .input-line { display: flex; align-items: center; }
+        .terminal-input { background: #111; border: 1px solid #0f0; color: #0f0; flex: 1; padding: 5px; outline: none; }
+        .send-btn { background:#0f0; color:#000; border:none; padding:5px 15px; margin-left:5px; cursor:pointer; font-weight:bold; }
+        .send-btn:hover { background:#0c0; }
+        .thinking { animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
     <div id="terminal"></div>
-    <div class="input-line" id="input-container" style="display:none;">
+    <div class="input-line" id="input-container">
         <span class="prompt"># </span>
-        <input type="text" class="terminal-input" id="terminal-input" autocomplete="off">
-        <button class="send-btn" onclick="sendCommand()">SEND</button>
+        <input type="text" class="terminal-input" id="cmdInput" placeholder="اكتب 'api' باش تكلم السيرفر">
+        <button class="send-btn" onclick="handleCommand()">Send</button>
     </div>
 
     <script>
         const terminal = document.getElementById('terminal');
-        const input = document.getElementById('terminal-input');
+        const input = document.getElementById('cmdInput');
         const inputContainer = document.getElementById('input-container');
         let terminalContent = '';
         let chatHistory = [];
 
-        function print(text) {
-            terminalContent += text + '\n';
+        function addLine(text, className = '') {
+            terminalContent += `<span class="${className}">${text}</span>\n`;
             terminal.innerHTML = terminalContent;
             window.scrollTo(0, document.body.scrollHeight);
         }
 
-        async function typeText(text) {
-            for (let char of text) {
-                terminalContent += char;
-                terminal.innerHTML = terminalContent;
-                await new Promise(r => setTimeout(r, 5));
-            }
-            terminalContent += '\n';
-        }
-
-        function showInput() { inputContainer.style.display = 'flex'; input.focus(); }
-        
-        function sendCommand() {
-            const command = input.value;
-            if (!command) return;
-            print(`<span class="green"># </span>${command}`);
+        function handleCommand() {
+            const cmd = input.value.trim();
+            if (!cmd) return;
+            
+            addLine(`# ${cmd}`, 'purple');
             input.value = '';
-            askRealAI(command);
-        }
-
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendCommand();
-        });
-
-        async function askRealAI(q) {
-            if (q.toLowerCase() === 'clear') {
-                terminalContent = ''; terminal.innerHTML = '';
-                print('<span class="green">[SYSTEM]</span> Terminal cleared.');
+            
+            if (cmd === 'clear') {
+                terminalContent = '';
+                terminal.innerHTML = '';
                 return;
             }
-            chatHistory.push({role: "user", content: q});
-            print('<span class="purple thinking">[AI]</span> Thinking...');
-            let answer = '';
-            try {
-             let res = await fetch('https://corsproxy.io/?https://ai.hackclub.com/chat/completions', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ 
-        model: 'gpt-3.5-turbo',
-        messages: chatHistory 
-    })
-});
-                if (!res.ok) throw new Error('HackClub down');
-                let data = await res.json();
-                answer = data.choices[0].message.content;
-            } catch (e) {
-                try {
-                    let res = await fetch('https://text.pollinations.ai/', {
-                        method: 'POST', headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ messages: chatHistory, model: 'openai' })
-                    });
-                    let data = await res.json();
-                    answer = data;
-                } catch (e2) {
-                    answer = 'ERROR: Both neural links failed. Check your internet, boss.';
-                }
+            
+            if (cmd === 'api') {
+                callAPI();
+            } else if (cmd === 'help') {
+                addLine('الأوامر المتاحة:', 'green');
+                addLine('api   - يكلم الـ API ويغلب الـ Boss', 'green');
+                addLine('clear - يمسح الـ terminal', 'green');
+                addLine('help  - يظهر المساعدة هاذي', 'green');
+            } else {
+                addLine(`Command not found: ${cmd}`, 'red');
             }
-            chatHistory.push({role: "assistant", content: answer});
-            terminalContent = terminalContent.replace('<span class="purple thinking">[AI]</span> Thinking...\n', '');
-            terminal.innerHTML = terminalContent;
-            await typeText(answer);
-            print('');
         }
 
-        async function connectToAI() {
-            print('<span class="blue">DAMAS OS v6.4 REAL AI - GPT Neural Link</span>');
-            print('<span class="purple">[AI]</span> Connecting to HackClub AI servers...');
-            await new Promise(r => setTimeout(r, 1000));
-            print('<span class="green">[OK]</span> Quantum tunnel: ESTABLISHED');
-            print('<span class="green">[OK]</span> Neural network: ONLINE');
-            print('');
-            print('<span class="purple">[DAMAS_AI]</span># I am now connected to a real AI brain.');
-            print('<span class="purple">[DAMAS_AI]</span># Ask me anything. For real this time.');
-            print('');
-            showInput();
+        async function callAPI() {
+            addLine('نحاولو نغلبو الـ Boss...', 'green');
+            addLine('Connecting...', 'thinking');
+            
+            try {
+                const res = await fetch('/api/data') // هذا يمشي عبر vercel.json proxy
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
+                const data = await res.json();
+                // نحي سطر thinking
+                terminalContent = terminalContent.replace(/<span class="thinking">.*<\/span>\n/, '');
+                terminal.innerHTML = terminalContent;
+                
+                addLine('غلبنا الـ Boss بنجاح! 🎉', 'green');
+                addLine(JSON.stringify(data, null, 2), 'purple');
+                
+            } catch (err) {
+                terminalContent = terminalContent.replace(/<span class="thinking">.*<\/span>\n/, '');
+                terminal.innerHTML = terminalContent;
+                
+                addLine(`الـ Boss ضربنا: ${err.message}`, 'red');
+                addLine('باش نعاود المحاولة بعد 2 ثواني...', 'red');
+                setTimeout(callAPI, 2000);
+            }
         }
 
-        window.onload = () => {
-            print('<span class="blue">[ BOOTING DAMAS OS v6.4 ]</span>');
-            print('<button onclick="connectToAI()" style="background:#00ffff; color:#000; border:none; padding:10px; font-family:monospace; font-weight:bold; margin:10px 0;">[ CONNECT TO AI ]</button>');
-        };
+        // Enter key support
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleCommand();
+        });
+
+        // بداية
+        addLine('DAMAS OS v6.4 - Level 99 Edition', 'green');
+        addLine('اكتب "help" باش تشوف الأوامر', 'green');
+        addLine('اكتب "api" باش تهاجم الـ Boss', 'purple');
+        addLine('----------------------------------', 'green');
     </script>
 </body>
 </html>
