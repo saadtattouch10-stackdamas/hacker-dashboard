@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/ai",
-      "destination": "https://ai.hackclub.com/chat/completions"
+      "destination": "https://ai.hackclub.com/v1/chat/completions"
     }
   ]
 }
