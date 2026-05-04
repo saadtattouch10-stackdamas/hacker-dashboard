@@ -5,8 +5,7 @@ export const config = {
 export default async function handler(req) {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Use POST only' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      status: 405, headers: { 'Content-Type': 'application/json' },
     });
   }
 
@@ -19,20 +18,26 @@ export default async function handler(req) {
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
         messages: body.messages,
+        stream: false
       }),
     });
 
     const data = await hackClubRes.json();
 
+    // كان HackClub رجع Error نوريوها
+    if (data.error) {
+      return new Response(JSON.stringify({ error: data.error.message }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      status: 200, headers: { 'Content-Type': 'application/json' },
     });
     
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Edge Function crashed: ' + error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ error: 'Server crashed: ' + error.message }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
     });
   }
 }
