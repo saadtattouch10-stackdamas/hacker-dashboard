@@ -1,8 +1,7 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/ai",
-      "destination": "https://ai.hackclub.com/v1/chat/completions"
+  "functions": {
+    "api/ai.js": {
+      "runtime": "nodejs18.x"
     }
-  ]
+  }
 }
