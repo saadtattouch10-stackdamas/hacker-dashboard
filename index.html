@@ -102,15 +102,24 @@
                 
                 addOutput('Connecting...', 'info');
                 try {
-                    const res = await fetch('/api/ai', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-  messages: [
-    {role: 'system', content: 'You are DAMAS AI, a helpful hacker assistant.'},
-    {role: 'user', content: prompt.trim()}
-  ]
-})
+                    // خذينا الكلام بعد كلمة api
+let userPrompt = command.replace('api', '').trim();
+
+// نتأكدو انو مش فارغ
+if (!userPrompt) {
+  throw new Error('اكتب سؤالك بعد api يا معلم');
+}
+
+const res = await fetch('/api/ai', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    messages: [
+      {role: 'system', content: 'You are DAMAS AI, a helpful hacker assistant from Tunisia.'},
+      {role: 'user', content: String(userPrompt)} // هذا هو السحر: String()
+    ]
+  })
+});
                     });
 
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
