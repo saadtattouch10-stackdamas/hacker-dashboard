@@ -1,39 +1,38 @@
-export default async function handler(req, res) {
-  // نقبلو كان POST
-  if (req.method!== 'POST') {
-    return res.status(405).json({ error: 'Use POST only' });
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req) {
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Use POST only' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
-    // نكلمو HackClub
+    const body = await req.json();
+    
     const hackClubRes = await fetch('https://ai.hackclub.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant', // بدلنا الـ model هذا يخدم ديما
-        messages: req.body.messages,
-        max_tokens: 500
-      })
+        model: 'llama-3.1-8b-instant',
+        messages: body.messages,
+      }),
     });
 
     const data = await hackClubRes.json();
 
-    // كان HackClub رجع Error، نوريوها
-    if (!hackClubRes.ok) {
-      console.error('HackClub Error:', data);
-      return res.status(hackClubRes.status).json({ 
-        error: data.error?.message || 'HackClub API Error' 
-      });
-    }
-    
-    // كل شي تمام، نرجعو الجواب
-    res.status(200).json(data);
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
     
   } catch (error) {
-    // كان صار Crash في السارفر متاعنا
-    console.error('Server Crash:', error);
-    res.status(500).json({ error: 'Server crashed: ' + error.message });
+    return new Response(JSON.stringify({ error: 'Edge Function crashed: ' + error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
