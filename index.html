@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DAMAS Terminal</title>
+  <title>DAMAS TERMINAL</title>
   <style>
     body {
       background: #000;
@@ -19,6 +19,7 @@
       padding: 10px;
       margin-bottom: 10px;
       white-space: pre-wrap;
+      word-wrap: break-word;
     }
     #inputArea {
       display: flex;
@@ -32,6 +33,7 @@
       padding: 10px;
       font-family: inherit;
       font-size: 16px;
+      outline: none;
     }
     #sendBtn {
       background: #00ff00;
@@ -40,11 +42,15 @@
       padding: 10px 20px;
       font-weight: bold;
       cursor: pointer;
+      font-family: inherit;
+    }
+    #sendBtn:hover {
+      background: #00cc00;
     }
   </style>
 </head>
 <body>
-  <div id="output">DAMAS TERMINAL v1.0\nاكتب help للمساعدة\nاكتب api سؤالك للتحدث مع DAMAS AI\n</div>
+  <div id="output">DAMAS TERMINAL v2.0\nاكتب help للمساعدة\nاكتب api سؤالك للتحدث مع DAMAS AI\n</div>
   <div id="inputArea">
     <input id="commandInput" type="text" placeholder="اكتب الأمر هنا..." autofocus>
     <button id="sendBtn">Send</button>
@@ -56,7 +62,10 @@
     const sendBtn = document.getElementById('sendBtn');
 
     function print(text, color = '#00ff00') {
-      output.innerHTML += `<div style="color:${color}">${text}</div>`;
+      const div = document.createElement('div');
+      div.style.color = color;
+      div.textContent = text;
+      output.appendChild(div);
       output.scrollTop = output.scrollHeight;
     }
 
@@ -81,7 +90,7 @@
         print('...Connecting to DAMAS AI', 'yellow');
 
         try {
-          let userPrompt = command.replace('api', '').trim();
+          let userPrompt = command.substring(4).trim();
 
           if (!userPrompt) {
             throw new Error('اكتب سؤالك بعد api يا معلم');
@@ -92,8 +101,8 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               messages: [
-                {role: 'system', content: 'You are DAMAS AI, a helpful hacker assistant from Tunisia. Answer in Tunisian dialect.'},
-                {role: 'user', content: String(userPrompt)}
+                {role: 'system', content: 'You are DAMAS AI, a helpful hacker assistant from Tunisia. Answer in Tunisian dialect using Arabic script. Be friendly and a bit sarcastic.'},
+                {role: 'user', content: userPrompt}
               ]
             })
           });
@@ -105,7 +114,7 @@
             return;
           }
 
-          if (!data.choices ||!data.choices[0]) {
+          if (!data.choices ||!data.choices[0] ||!data.choices[0].message) {
             print('السارفر رجع رد فارغ. جرب مرة اخرى', 'red');
             return;
           }
