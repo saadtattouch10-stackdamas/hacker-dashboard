@@ -1,147 +1,132 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAMAS OS v6.5</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #000;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        #terminal {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-       .input-line {
-            display: flex;
-            padding: 10px 15px;
-            border-top: 1px solid #00ff00;
-        }
-        #prompt { color: #00ff00; margin-left: 8px; }
-        #command {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #00ff00;
-            font-family: inherit;
-            font-size: 16px;
-            outline: none;
-        }
-        #send {
-            background: #00ff00;
-            color: #000;
-            border: none;
-            padding: 5px 15px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-       .error { color: #ff0000; }
-       .success { color: #00ffff; }
-       .info { color: #ffff00; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DAMAS Terminal</title>
+  <style>
+    body {
+      background: #000;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      margin: 0;
+      padding: 20px;
+    }
+    #output {
+      height: 80vh;
+      overflow-y: auto;
+      border: 1px solid #00ff00;
+      padding: 10px;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+    }
+    #inputArea {
+      display: flex;
+      gap: 10px;
+    }
+    #commandInput {
+      flex: 1;
+      background: #111;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 16px;
+    }
+    #sendBtn {
+      background: #00ff00;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <div id="terminal">DAMAS OS v6.5 - Neural Link Active
-اكتب 'help' باش تشوف الاوامر
-اكتب 'api' و بعدها سؤالك باش تحكي مع الـ AI
+  <div id="output">DAMAS TERMINAL v1.0\nاكتب help للمساعدة\nاكتب api سؤالك للتحدث مع DAMAS AI\n</div>
+  <div id="inputArea">
+    <input id="commandInput" type="text" placeholder="اكتب الأمر هنا..." autofocus>
+    <button id="sendBtn">Send</button>
+  </div>
 
-</div>
-    <div class="input-line">
-        <span id="prompt">#</span>
-        <input type="text" id="command" placeholder="اكتب امر هنا..." autofocus>
-        <button id="send">Send</button>
-    </div>
+  <script>
+    const output = document.getElementById('output');
+    const input = document.getElementById('commandInput');
+    const sendBtn = document.getElementById('sendBtn');
 
-    <script>
-        const terminal = document.getElementById('terminal');
-        const commandInput = document.getElementById('command');
-        const sendBtn = document.getElementById('send');
+    function print(text, color = '#00ff00') {
+      output.innerHTML += `<div style="color:${color}">${text}</div>`;
+      output.scrollTop = output.scrollHeight;
+    }
 
-        function addOutput(text, className = '') {
-            const line = document.createElement('div');
-            if (className) line.className = className;
-            line.textContent = text;
-            terminal.appendChild(line);
-            terminal.scrollTop = terminal.scrollHeight;
+    async function handleCommand() {
+      const command = input.value.trim();
+      if (!command) return;
+
+      print(`# ${command}`, '#00ff00');
+      input.value = '';
+
+      if (command === 'help') {
+        print('الأوامر المتاحة:\nhelp - المساعدة\nclear - مسح الشاشة\napi سؤالك - تحدث مع DAMAS AI', 'yellow');
+        return;
+      }
+
+      if (command === 'clear') {
+        output.innerHTML = '';
+        return;
+      }
+
+      if (command.startsWith('api ')) {
+        print('...Connecting to DAMAS AI', 'yellow');
+
+        try {
+          let userPrompt = command.replace('api', '').trim();
+
+          if (!userPrompt) {
+            throw new Error('اكتب سؤالك بعد api يا معلم');
+          }
+
+          const res = await fetch('/api/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              messages: [
+                {role: 'system', content: 'You are DAMAS AI, a helpful hacker assistant from Tunisia. Answer in Tunisian dialect.'},
+                {role: 'user', content: String(userPrompt)}
+              ]
+            })
+          });
+
+          const data = await res.json();
+
+          if (data.error) {
+            print(`خطأ من السارفر: ${data.error}`, 'red');
+            return;
+          }
+
+          if (!data.choices ||!data.choices[0]) {
+            print('السارفر رجع رد فارغ. جرب مرة اخرى', 'red');
+            return;
+          }
+
+          const reply = data.choices[0].message.content;
+          print(reply, '#00ff00');
+
+        } catch (err) {
+          print(`خطأ: ${err.message}`, 'red');
         }
+        return;
+      }
 
-        async function runCommand() {
-            const fullCommand = commandInput.value.trim();
-            if (!fullCommand) return;
+      print(`أمر غير معروف: ${command}`, 'red');
+    }
 
-            addOutput(`# ${fullCommand}`);
-            commandInput.value = '';
+    sendBtn.addEventListener('click', handleCommand);
 
-            const parts = fullCommand.split(' ');
-            const cmd = parts[0].toLowerCase();
-            const args = parts.slice(1).join(' ');
-
-            if (cmd === 'help') {
-                addOutput('الاوامر المتاحة:', 'info');
-                addOutput('api [سؤالك] - تحكي مع DAMAS AI');
-                addOutput('clear - تمسح الشاشة');
-                addOutput('help - تشوف الاوامر');
-            } 
-            else if (cmd === 'clear') {
-                terminal.innerHTML = 'DAMAS OS v6.5 - Neural Link Active\n\n';
-            }
-            else if (cmd === 'api') {
-                if (!args) {
-                    addOutput('استعمل: api شنوا سؤالك؟', 'error');
-                    return;
-                }
-                
-                addOutput('Connecting...', 'info');
-                try {
-                    // خذينا الكلام بعد كلمة api
-let userPrompt = command.replace('api', '').trim();
-
-// نتأكدو انو مش فارغ
-if (!userPrompt) {
-  throw new Error('اكتب سؤالك بعد api يا معلم');
-}
-
-const res = await fetch('/api/ai', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    messages: [
-      {role: 'system', content: 'You are DAMAS AI, a helpful hacker assistant from Tunisia.'},
-      {role: 'user', content: String(userPrompt)} // هذا هو السحر: String()
-    ]
-  })
-});
-                    });
-
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    
-                    const data = await res.json();
-                    const reply = data.choices[0].message.content;
-                    addOutput(reply, 'success');
-                    
-                } catch (err) {
-                    addOutput(`خطأ: ${err.message}`, 'error');
-                    addOutput('تأكد انك عملت ملف api/ai.js', 'error');
-                }
-            } 
-            else {
-                addOutput(`Command not found: ${cmd}`, 'error');
-            }
-        }
-
-        sendBtn.onclick = runCommand;
-        commandInput.onkeydown = (e) => {
-            if (e.key === 'Enter') runCommand();
-        };
-    </script>
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleCommand();
+    });
+  </script>
 </body>
 </html>
