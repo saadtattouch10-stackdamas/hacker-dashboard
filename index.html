@@ -106,8 +106,11 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            messages: [{ role: 'user', content: args }]
-                        })
+  messages: [
+    {role: 'system', content: 'You are DAMAS AI, a helpful hacker assistant.'},
+    {role: 'user', content: prompt.trim()}
+  ]
+})
                     });
 
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
